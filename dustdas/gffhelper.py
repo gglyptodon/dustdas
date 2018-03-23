@@ -53,7 +53,22 @@ class GFFObject(object):
                 if header == self.seqname:
                     return header, seq
 
-    def attrib_filter(self, tag=None, value=None):
+    def attrib_filter_fun(self, tfun=None, targ=None, vfun=lambda x,y : x.startswith(y), varg=None):
+        if tfun and vfun:
+            for a in self.attributes:
+                t = tfun(a.tag, targ)
+                v = vfun(a.value, varg)
+                if t and v:
+                    return True
+
+        ##if tfun and targ:
+        # #  return  tfun(self.tag, targ)
+        #if vfun and varg:
+        #    return vfun(self.value, varg)
+        return False #TODO
+
+
+    def attrib_filter(self, tag=None, value=None): # todo add passing filter with arbitrary function
         if tag and not value:
             return ([a for a in self.attributes if a.tag == tag])
         elif value and not tag:
