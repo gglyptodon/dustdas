@@ -48,6 +48,12 @@ def main():
 
         if o.feature == "exon":
             exons.append(o)
+        if o.feature == "five_prime_UTR":
+            five_prime_UTRs.append(o)
+
+        if o.feature == "three_prime_UTR":
+            three_prime_UTRs.append(o)
+
 
         #print(o)
         t = o.attrib_filter(tag="Parent", value="AHYPO_002876-RA.v1.0")
@@ -70,9 +76,27 @@ def main():
     #print (allthefeatures)
 
     #print(genes[0])
-    for g in genes[0:10]:
+    for g in genes[0:0]:
         print("gene:", g)
-        print ([e for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in g.attributes if a.tag=="Name"][0])])
+        print("mRNA:")
+        print ([e for e in mrnas if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in g.attributes if a.tag=="Name"][0])])
+        print("exons:")
+        print ([(e.start,e.end,e.strand,e)  for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in g.attributes if a.tag=="Name"][0])])
+        print("cds:")
+        print ([(e.start,e.end,e.strand)  for e in cds if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in g.attributes if a.tag=="Name"][0])])
+        print("3pUTR:")
+        print ([(e.start,e.end,e.strand)  for e in three_prime_UTRs if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in g.attributes if a.tag=="Name"][0])])
+        print("5pUTR:")
+        print ([(e.start,e.end,e.strand)  for e in five_prime_UTRs if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in g.attributes if a.tag=="Name"][0])])
+
+#TODO:relative to mrna: gaps between exons , filter by mrna instead of gene
+
+        print ("#########")
+
+    for m in mrnas[0:2]:
+        print("mrna", m)
+        print("exons:")
+        print ([(e.start,e.end,e.strand)  for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "Parent", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in m.attributes if a.tag=="ID"][0])])
         print ("#########")
     #print(exons[0:20])
 
