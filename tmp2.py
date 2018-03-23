@@ -96,23 +96,11 @@ def main():
     for m in mrnas[0:2]:
         print("mrna", m)
         print("exons:")
-        print ([(e.start,e.end,e.strand)  for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "Parent", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in m.attributes if a.tag=="ID"][0])])
+        print ([(e.start,e.end,e.strandt )  for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "Parent", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in m.attributes if a.tag=="ID"][0])])
         print ("#########")
     #print(exons[0:20])
 
     #print ([e for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg="AHYPO_000001-RA.v1.0.exon.")])
-    """with open(args.gff) as inf:
-        for l in inf:
-            if l.startswith("#"):
-                pass
-            else:
-                g = gh.GFFObject(gffline=l)
-                #print(g.attribute)
-                # show all available attributes
-                if "Parent" in [x.tag for x in g.attribute]:
-                    print ([a.value for a in g.attributes if a.tag == "Parent"])
-    
-                #
-"""
+
 if __name__ == "__main__":
     main()
