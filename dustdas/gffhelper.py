@@ -38,20 +38,33 @@ class GFFObject(object):
         self.frame = d["frame"]
         self.attribute = d["attribute"]
         self.attributes = [GFFAttribute(x.strip()) for x in d["attribute"].split(";")]
+        self.fastaheader = None
+        self.fastasequence = None
 
-    def get_sequence(self, fastafile, regex=None):
-        """ example:(.*)ID=AHYPO_002876-RA.v1.0 """
-        #header, seq = fh.FastaParser().read_fasta(fasta=fastafile)
-        for header, seq in fh.FastaParser().read_fasta(fasta=fastafile):
-            #print(header)
-            if regex:
-                p = re.compile(regex)
-                m = p.match(header)
-                if m:
-                    return header, seq
-            else:
-                if header == self.seqname:
-                    return header, seq
+    def get_sequence(self, fastafile=None, fastadct=None, regex=None):
+        if fastafile:
+            for header, seq in fh.FastaParser.read_fasta(fasta=fastafile):
+                if regex:
+                    p = re.compile(regex)
+                    m = p.match(header)
+                    if m:
+                        return header, seq
+                else:
+                    if header == self.seqname:
+                        return header, seq
+        elif fastadct:
+            for header, seq in fastadct.items():
+                if regex:
+                    p = re.compile(regex)
+                    m = p.match(header)
+                    if m:
+                        return header, seq
+                else:
+                    return header, fastadct[header]
+
+
+
+
 
     def attrib_filter_fun(self, tfun=None, targ=None, vfun=lambda x,y : x.startswith(y), varg=None):
         if tfun and vfun:
@@ -83,7 +96,7 @@ class GFFObject(object):
 
     def attach_fasta(self, header, seq):
         self.fastaheader = header
-        self.fastaseqence = seq
+        self.fastasequence = seq
 
 
 class GFFAttribute(object):

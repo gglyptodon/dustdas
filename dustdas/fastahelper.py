@@ -20,13 +20,11 @@ class FastaHelper(object):
 
 
 class FastaParser(object):
-    def read_fasta(self, fasta, delim=None, asID=0):
-        """read from fasta fasta file 'fasta'
-        and split sequence id at 'delim' (if set)\n
-        example:\n
-        >idpart1|idpart2\n
-        ATGTGA\n
-        and 'delim="|"' returns ("idpart1", "ATGTGA")
+    @staticmethod
+    def read_fasta(fasta):
+        """
+        read from fasta fasta file 'fasta'
+        yield header, sequence
         """
         name = ""
         fasta = open(fasta, "r")
@@ -44,12 +42,19 @@ class FastaParser(object):
                     seq.append(name)
             joinedSeq = "".join(seq)
             line = line[1:]
-            if delim:
-                # vprint("delim set to "+delim)
-                line = line.split(delim)[asID]
             yield (line.rstrip(), joinedSeq.rstrip())
         fasta.close()
 
+    @staticmethod
+    def read_fasta_whole(fasta):
+        """
+        read from fasta fasta file 'fasta'
+        returns dict header:sequence
+        """
+        res = dict()
+        for h,s in FastaParser.read_fasta(fasta=fasta):
+            res[h] = s
+        return res
 
 class SeqTranslator(object):
     RNAmap = {
@@ -175,6 +180,25 @@ class LargeFastaParser(object):
             return landmarkSeq[start:end]
 
         return landmarkSeq[start - 1:end - 1]
+
+    def getSequenceByCoordinatesOnLandmarkTmp(self, landmarkSeq, start, end, strand):
+        print("abc", start,end,strand)
+        #start = int(start) - 1
+        #end = int(end)
+        #if (strand == "+" or strand == "."):
+        #    return (landmarkSeq[start:end])
+        #elif strand == ("-"):
+        res = landmarkSeq[start:end]
+        print(res,"res")
+            #tr = str.maketrans('AGTCagtc', 'TCAGtcag')
+            #res = res.translate(tr)
+            #return res[::-1]
+        #else:
+        #    print(strand)
+        #    print("WARNING: strand was of unknown orientation\n Will return as if it was '+'\n")
+        #    return landmarkSeq[start:end]
+        return res
+        #return landmarkSeq[start - 1:end - 1]
 
 
 class GFFParser():
