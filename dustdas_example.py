@@ -8,6 +8,8 @@ from dustdas import fastahelper as fh
 
 def formatHelp():
     print("""
+        from http://www.ensembl.org/info/website/upload/gff.html:
+    
     seqname - name of the chromosome or scaffold; chromosome names can be given with or without the 'chr' prefix. Important note: the seqname must be one used within Ensembl, i.e. a standard chromosome name or an Ensembl identifier such as a scaffold ID, without any additional content such as species or assembly. See the example GFF output below.
     source - name of the program that generated this feature, or the data source (database or project name)
     feature - feature type name, e.g. Gene, Variation, Similarity
@@ -36,7 +38,6 @@ def main():
     exons = []
     cds = []
 
-
     for o in gh.read_gff_file(infile=args.gff):
         if o.feature in allthefeatures:
             allthefeatures[o.feature] += 1
@@ -62,18 +63,12 @@ def main():
             three_prime_UTRs.append(o)
 
 
-        if o.feature in allthefeatures:
-            allthefeatures[o.feature]+=1
-        else:
-            allthefeatures[o.feature]= 1
-
     print(allthefeatures)
 
-    # show first five genes
-    for g in genes[0:3]:
+    # show first few genes
+    for g in genes[0:2]:
         print("gene:", g)
         print("mRNA:")
-
         # print all mRNAs whose "ID" tag value of mrna starts with "Name" tag value of gene
         print ([m for m in mrnas if m.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "ID", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in g.attributes if a.tag=="Name"][0])])
         print("exons:")
@@ -98,7 +93,9 @@ def main():
 
         # attach fasta sequence to object
         h,s = m.get_sequence(fastadct=fasta_dict, regex=r)
-        m.attach_fasta(h,s)
+        mrnaseq=fh.LargeFastaParser().getSequenceByCoordinatesOnLandmark(landmarkSeq=s,start=m.start, end=m.end, strand=m.strand)
+        m.attach_fasta(";".join([h,m.start, m.end, m.strand]),mrnaseq)
+
 
         # look at all exons of mrna
         # filter for all exons whose parent tag value starts with mrna ID tag
@@ -106,10 +103,23 @@ def main():
 
         for e in mrnaExons:
             print(e)
-            print(fh.LargeFastaParser().getSequenceByCoordinatesOnLandmark(landmarkSeq=m.fastasequence, start=e.start,
-                                                                      end=e.end, strand=e.strand))
+            #print(fh.LargeFastaParser().getSequenceByCoordinatesOnLandmark(landmarkSeq=m.fasta_sequence, start=e.start,
+            #                                                          end=e.end, strand=e.strand))
 
         print ("#")
+
+    with open ("tmp.json", 'w') as out:
+        for m in exons[0:3]:
+            out.write(m.to_json())
+        for m in mrnas[0:3]:
+            out.write(m.to_json(omit_fasta=True))
+        for m in mrnas[0:3]:
+            out.write(m.to_json(omit_fasta=False))
+
+
+
+
+
 
 
 if __name__ == "__main__":

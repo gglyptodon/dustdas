@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import re
 import sys
+import json
 
-import  dustdas.fastahelper  as fh
+import dustdas.fastahelper as fh
+
 
 class GFFObject(object):
     @staticmethod
@@ -21,7 +23,7 @@ class GFFObject(object):
                    "score": gffcols[5],
                    "strand": gffcols[6],
                    "frame": gffcols[7],
-                   "attribute": gffcols[8],
+                   "attribute": gffcols[8].strip(),
                    }
 
             return res
@@ -38,8 +40,23 @@ class GFFObject(object):
         self.frame = d["frame"]
         self.attribute = d["attribute"]
         self.attributes = [GFFAttribute(x.strip()) for x in d["attribute"].split(";")]
-        self.fastaheader = None
-        self.fastasequence = None
+        self.fasta_header = None
+        self.fasta_sequence = None
+
+    def to_json(self, omit_fasta=False):
+        if omit_fasta:
+            res = dict()
+            for k,v in self.__dict__.items():
+                if k in ["fasta_header", "fasta_sequence"]:
+                    pass
+                else:
+                    res[k] = v
+            return json.dumps(res, default=lambda o:o.__dict__, sort_keys=True, indent=4)
+
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)
+        #return json.dumps(self) #todo
+
 
     def get_sequence(self, fastafile=None, fastadct=None, regex=None):
         if fastafile:
@@ -95,8 +112,8 @@ class GFFObject(object):
         return "{},{},{},{},{},{},{},{},{}".format(self.seqname, self.source, self.feature, self.start, self.end, self.score, self.strand, self.frame, self.attributes)
 
     def attach_fasta(self, header, seq):
-        self.fastaheader = header
-        self.fastasequence = seq
+        self.fasta_header = header
+        self.fasta_sequence = seq
 
 
 class GFFAttribute(object):
