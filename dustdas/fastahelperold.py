@@ -1,25 +1,21 @@
-import re
+import re, string
 
 
 class FastaHelper(object):
-    @staticmethod
-    def remove_newlines(s):
-        yield s.replace("\n", "")
+    def remove_newlines(self, string):
+        yield string.replace("\n", "")
 
-    @staticmethod
-    def insert_newlines(s, every=80):
-        return '\n'.join(s[i:i + every] for i in range(0, len(s), every))
+    def insert_newlines(self, string, every=80):
+        return '\n'.join(string[i:i + every] for i in range(0, len(string), every))
 
-    @staticmethod
-    def complement(s):
+    def complement(self, string):
         tr = str.maketrans('AGTCagtc', 'TCAGtcag')
-        res = s.translate(tr)
-        return res
+        res = string.translate(tr)
+        return (res)
 
-    @staticmethod
-    def reverse_complement(s):
+    def reverseComplement(self, string):
         tr = str.maketrans('AGTCagtc', 'TCAGtcag')
-        res = s.translate(tr)
+        res = string.translate(tr)
         return res[::-1]
 
 
