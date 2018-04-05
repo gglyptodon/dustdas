@@ -144,3 +144,34 @@ def read_gff_file(infile):
                 obj = GFFObject(gffline=l)
                 yield obj
 
+
+"""
+
+    From http://www.ensembl.org/info/website/upload/gff.html:
+    
+    seqname - name of the chromosome or scaffold; chromosome names can be given with or without the 'chr' prefix. Important note: the seqname must be one used within Ensembl, i.e. a standard chromosome name or an Ensembl identifier such as a scaffold ID, without any additional content such as species or assembly. See the example GFF output below.
+    source - name of the program that generated this feature, or the data source (database or project name)
+    feature - feature type name, e.g. Gene, Variation, Similarity
+    start - Start position of the feature, with sequence numbering starting at 1.
+    end - End position of the feature, with sequence numbering starting at 1.
+    score - A floating point value.
+    strand - defined as + (forward) or - (reverse).
+    frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
+    attribute - A semicolon-separated list of tag-value pairs, providing additional information about each feature. 
+    
+    ID, Name, Alias, Parent, Target, Gap, Derives_from, Note,
+    Dbxref, Ontology_term, Is_circular
+    Parent: groups exons into transcripts, transcripts into genes etc.
+        A feature may have multiple parents.
+    Target: Indicates the target of a nucleotide-to-nucleotide
+        or protein-to-nucleotide alignment.
+        The format of the value is "target_id start end [strand]",
+        where strand is optional and may be "+" or "-".
+    Gap: The alignment of the feature to the target if the two
+        are not collinear (e.g. contain gaps).
+        The alignment format is taken from the CIGAR format described
+        in the Exonerate documentation.
+        (http://cvsweb.sanger.ac.uk/cgi-bin/cvsweb.cgi/exonerate?cvsroot=Ensembl). ("THE GAP ATTRIBUTE")
+    Parent, the Alias, Note, DBxref and Ontology_term attributes can have multiple values.
+    
+"""

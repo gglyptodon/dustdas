@@ -124,36 +124,20 @@ class SeqTranslator(object):
             yield s[i * 3 + frameshift:i * 3 + 3 + frameshift]
 
     @staticmethod
-    def triplets1(s, frameshift=0):  # todo
-        if frameshift == 3:
-            frameshift = 0
-        # chop string into 3 char slices
-        for i in range(0, int(len(s) / 3)):
-            if frameshift == 0:
-                yield s[i * 3 + frameshift:i * 3 + 3 + frameshift]
-            elif frameshift == 1:
-                yield s[1 + i * 3 + frameshift:1 + i * 3 + 3 + frameshift]
-            elif frameshift == 2:
-                yield s[2 + i * 3 + frameshift:2 + i * 3 + 3 + frameshift]
-            else:
-                raise Exception("frameshift out of range")
-
-    @staticmethod
     def dna2prot(s, frameshift=0):
         res = ""
-        for a in SeqTranslator.triplets1(s, frameshift):
+        for a in SeqTranslator.triplets(s, frameshift):
             try:
                 res += SeqTranslator.DNAmap[a]
             except KeyError as e:
                 raise Exception("{} not in DNAmap".format(a))
-                print(e)
-                res += ""
+
         return res
 
     @staticmethod
     def rna2prot(s, frameshift=0):
         res = ""
-        for a in SeqTranslator.triplets1(s, frameshift):
+        for a in SeqTranslator.triplets(s, frameshift):
             try:
                 res += SeqTranslator.RNAmap[a]
             except KeyError as e:
