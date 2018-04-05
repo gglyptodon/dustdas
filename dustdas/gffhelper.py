@@ -2,7 +2,6 @@
 import re
 import sys
 import json
-
 import dustdas.fastahelper as fh
 
 
@@ -13,7 +12,7 @@ class GFFObject(object):
         if gffline.startswith("#"):
             pass
         else:
-            gffcols = gffline.split("\t")
+            gffcols = [g.strip() for g in gffline.split("\t")]
 
             res = {"seqname": gffcols[0],
                    "source": gffcols[1],
@@ -23,7 +22,7 @@ class GFFObject(object):
                    "score": gffcols[5],
                    "strand": gffcols[6],
                    "frame": gffcols[7],
-                   "attribute": gffcols[8].strip(),
+                   "attribute": gffcols[8],
                    }
 
             return res
@@ -46,19 +45,21 @@ class GFFObject(object):
     def to_json(self, omit_fasta=False):
         if omit_fasta:
             res = dict()
-            for k,v in self.__dict__.items():
+            for k, v in self.__dict__.items():
                 if k in ["fasta_header", "fasta_sequence"]:
                     pass
                 else:
                     res[k] = v
-            return json.dumps(res, default=lambda o:o.__dict__, sort_keys=True, indent=4)
+            return json.dumps(res, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
         return json.dumps(self, default=lambda o: o.__dict__,
                           sort_keys=True, indent=4)
-        #return json.dumps(self) #todo
-
 
     def get_sequence(self, fastafile=None, fastadct=None, regex=None):
+        """ Takes either a path to a fasta file or a pre-filled dictionary with header and sequence as items.
+         If regex is present, it returns first header and sequence whose header matches that regex.
+         If no regex is set it returns the header and sequence whose header matches self.seqname exactly.
+        """
         if fastafile:
             for header, seq in fh.FastaParser.read_fasta(fasta=fastafile):
                 if regex:
@@ -79,11 +80,7 @@ class GFFObject(object):
                 else:
                     return header, fastadct[header]
 
-
-
-
-
-    def attrib_filter_fun(self, tfun=None, targ=None, vfun=lambda x,y : x.startswith(y), varg=None):
+    def attrib_filter_fun(self, tfun=None, targ=None, vfun=lambda x, y: x.startswith(y), varg=None):
         if tfun and vfun:
             for a in self.attributes:
                 t = tfun(a.tag, targ)
@@ -97,14 +94,13 @@ class GFFObject(object):
         #    return vfun(self.value, varg)
         return False #TODO
 
-
-    def attrib_filter(self, tag=None, value=None): # todo add passing filter with arbitrary function
+    def attrib_filter(self, tag=None, value=None):  # todo add passing filter with arbitrary function
         if tag and not value:
-            return ([a for a in self.attributes if a.tag == tag])
+            return [a for a in self.attributes if a.tag == tag]
         elif value and not tag:
-            return ([a for a in self.attributes if a.value == value])
+            return [a for a in self.attributes if a.value == value]
         elif value and tag:
-            return ([a for a in self.attributes if a.value == value and a.tag == tag])
+            return [a for a in self.attributes if a.value == value and a.tag == tag]
         else:
             print("needs tag or value to filter. returns list of matches", file=sys.stderr)
 
@@ -142,10 +138,4 @@ def read_gff_file(infile):
             else:
                 obj = GFFObject(gffline=l)
                 yield obj
-                #tmp = l.split("\t")[2].lower().strip()
-                #if tmp == attrib.lower():
-                #    ln = l.split("\t")[8].strip()
-                #    yield (ln)
 
-def make_filter(tag, value):
-    pass
