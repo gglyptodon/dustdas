@@ -80,7 +80,12 @@ class GFFObject(object):
                 else:
                     return header, fastadct[header]
 
-    def attrib_filter_fun(self, tfun=None, targ=None, vfun=lambda x, y: x.startswith(y), varg=None):
+    def attrib_filter_fun(self, tfun, targ, vfun, varg):
+        """ Filters tags and values by given functions. First argument will always be mapped to attribute.tag (value),
+         second to targ (varg).
+         Eg tfun=lambda x,y: x==y, targ="ID" vfun=lambda x, y: x.startswith(y), varg="Chr1"
+         returns True when object's attribute value for tag "ID" starts with "Chr1"
+         """
         if tfun and vfun:
             for a in self.attributes:
                 t = tfun(a.tag, targ)
@@ -92,9 +97,9 @@ class GFFObject(object):
         # #  return  tfun(self.tag, targ)
         #if vfun and varg:
         #    return vfun(self.value, varg)
-        return False #TODO
+        return False  # TODO
 
-    def attrib_filter(self, tag=None, value=None):  # todo add passing filter with arbitrary function
+    def attrib_filter(self, tag=None, value=None):
         if tag and not value:
             return [a for a in self.attributes if a.tag == tag]
         elif value and not tag:
