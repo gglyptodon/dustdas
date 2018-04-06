@@ -125,6 +125,7 @@ class SeqTranslator(object):
 
     @staticmethod
     def dna2prot(s, frameshift=0):
+        frameshift = int(frameshift)
         res = ""
         for a in SeqTranslator.triplets(s, frameshift):
             try:
@@ -136,6 +137,7 @@ class SeqTranslator(object):
 
     @staticmethod
     def rna2prot(s, frameshift=0):
+        frameshift = int(frameshift)
         res = ""
         for a in SeqTranslator.triplets(s, frameshift):
             try:

@@ -93,7 +93,7 @@ def main():
 
         # attach fasta sequence to object
         h,s = m.get_sequence(fastadct=fasta_dict, regex=r)
-        mrnaseq=fh.LargeFastaParser().getSequenceByCoordinatesOnLandmark(landmarkSeq=s,start=m.start, end=m.end, strand=m.strand)
+        mrnaseq=fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,start=m.start, end=m.end, strand=m.strand)
         m.attach_fasta(";".join([h,m.start, m.end, m.strand]),mrnaseq)
 
 
@@ -101,20 +101,27 @@ def main():
         # filter for all exons whose parent tag value starts with mrna ID tag
         mrnaExons = [e for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "Parent", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in m.attributes if a.tag=="ID"][0])]
 
-        for e in mrnaExons:
-            print(e)
-            #print(fh.LargeFastaParser().getSequenceByCoordinatesOnLandmark(landmarkSeq=m.fasta_sequence, start=e.start,
-            #                                                          end=e.end, strand=e.strand))
 
         print ("#")
 
-    with open ("tmp.json", 'w') as out:
-        for m in exons[0:3]:
-            out.write(m.to_json())
-        for m in mrnas[0:3]:
-            out.write(m.to_json(omit_fasta=True))
-        for m in mrnas[0:3]:
-            out.write(m.to_json(omit_fasta=False))
+    for c in cds[0:30]:
+        id = c.seqname
+        r = r"""^{}""".format(id)
+        h,s = c.get_sequence(fastadct=fasta_dict, regex=r)
+        cdsseq=fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,start=c.start, end=c.end, strand=c.strand)
+        c.attach_fasta(";".join([h,c.start, c.end, c.strand]),cdsseq, include_protein=True)
+        print(">{}".format(c.fasta_header))
+        print(fh.SeqTranslator.dna2prot(c.fasta_sequence, frameshift=c.frame))
+
+    with open ("cds.json", 'w') as out:
+        #for m in exons[0:3]:
+        #    out.write(m.to_json())
+        #for m in mrnas[0:3]:
+        #    out.write(m.to_json(omit_fasta=True))
+        #for m in mrnas[0:3]:
+        #    out.write(m.to_json(omit_fasta=False))
+        for c in cds:
+            out.write(c.to_json(omit_fasta_protein=False))
 
 
 
