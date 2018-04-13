@@ -128,10 +128,6 @@ class SeqTranslator(object):
     def dna2prot(s, frameshift=0):
         frameshift = int(frameshift)
         res = ""
-        lm = len(s)/3
-        lms = (len(s)-frameshift)/3
-        if not lm == lms:
-            print("debug seq len: ",lm, "w shift:", lms)
         for a in SeqTranslator.triplets(s, frameshift):
             try:
                 res += SeqTranslator.DNAmap[a]
