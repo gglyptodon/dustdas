@@ -41,21 +41,12 @@ class GFFObject(object):
         self.attributes = [GFFAttribute(x.strip()) for x in d["attribute"].split(";")]
         self.fasta_header = None
         self.fasta_sequence = None
-        self.fasta_sequence_prot = None
 
-    def to_json(self, omit_fasta=False, omit_fasta_protein=True):
+    def to_json(self, omit_fasta=False):
         if omit_fasta:
             res = dict()
             for k, v in self.__dict__.items():
-                if k in ["fasta_header", "fasta_sequence", "fasta_sequence_prot"]:
-                    pass
-                else:
-                    res[k] = v
-            return json.dumps(res, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-        if omit_fasta_protein:
-            res = dict()
-            for k, v in self.__dict__.items():
-                if k in ["fasta_sequence_prot"]:
+                if k in ["fasta_header", "fasta_sequence"]:
                     pass
                 else:
                     res[k] = v
@@ -121,11 +112,9 @@ class GFFObject(object):
     def __repr__(self):
         return "{},{},{},{},{},{},{},{},{}".format(self.seqname, self.source, self.feature, self.start, self.end, self.score, self.strand, self.frame, self.attributes)
 
-    def attach_fasta(self, header, seq, include_protein=False):
+    def attach_fasta(self, header, seq):
         self.fasta_header = header
         self.fasta_sequence = seq
-        if include_protein:
-            self.fasta_sequence_prot = fh.SeqTranslator.dna2prot(self.fasta_sequence,frameshift=self.frame)
 
 
 class GFFAttribute(object):
