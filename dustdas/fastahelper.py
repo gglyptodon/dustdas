@@ -75,7 +75,7 @@ class FastaParser(object):
             res = orig_seq[start:end]
             return FastaHelper.reverse_complement(res)
         if strand not in ["-","+","."]:
-            raise Exception("strand in unknown orientation.")
+            raise StrandOrientationException("strand in unknown orientation.")
 
         return res
 
@@ -118,20 +118,25 @@ class SeqTranslator(object):
         "GGT": "G", "GGC": "G", "GGA": "G", "GGG": "G"
     }
     @staticmethod
-    def triplets(s, frameshift=0):
+    def triplets(s, frameshift):
         # chop string into 3 char slices
-        for i in range(0, int(len(s) / 3)):
+        for i in range(0, int(len(s) / 3)): #todo debug
+            #print(s[i * 3 + frameshift:i * 3 + 3 + frameshift])
             yield s[i * 3 + frameshift:i * 3 + 3 + frameshift]
 
     @staticmethod
     def dna2prot(s, frameshift=0):
         frameshift = int(frameshift)
         res = ""
+        lm = len(s)/3
+        lms = (len(s)-frameshift)/3
+        if not lm == lms:
+            print("debug seq len: ",lm, "w shift:", lms)
         for a in SeqTranslator.triplets(s, frameshift):
             try:
                 res += SeqTranslator.DNAmap[a]
-            except KeyError as e:
-                raise Exception("{} not in DNAmap".format(a))
+            except KeyError:
+                raise SequenceTranslationException("{} not in DNAmap, seq length:{}".format(a, len(s)))
 
         return res
 
@@ -146,3 +151,10 @@ class SeqTranslator(object):
                 print(e)
                 raise Exception("{} not in RNAmap".format(a))
         return res
+
+
+class SequenceTranslationException(Exception):
+    pass
+
+class StrandOrientationException(Exception):
+    pass

@@ -66,7 +66,7 @@ def main():
     print(allthefeatures)
 
     # show first few genes
-    for g in genes[0:2]:
+    for g in genes[0:0]:
         print("gene:", g)
         print("mRNA:")
         # print all mRNAs whose "ID" tag value of mrna starts with "Name" tag value of gene
@@ -83,36 +83,63 @@ def main():
         print ("#########")
 
     fasta_dict = fh.FastaParser.read_fasta_whole(args.fasta)
-    for m in mrnas[0:3]:
-        identifier = m.seqname # this will be used to match the (genome) fasta sequence
+    #for m in mrnas[0:3]:
+    #    identifier = m.seqname # this will be used to match the (genome) fasta sequence
         # for cds or protein fasta this could be sth like: identifier = m.attrib_filter(tag="pacid")
         # and regex pattern would be sth like this: r = r"""(.*)pacid={}""".format(identifier[0].value)
 
         # matching fasta header starts with identifier
-        r = r"""^{}""".format(identifier)
+    #    r = r"""^{}""".format(identifier)
 
         # attach fasta sequence to object
-        h,s = m.get_sequence(fastadct=fasta_dict, regex=r)
-        mrnaseq=fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,start=m.start, end=m.end, strand=m.strand)
-        m.attach_fasta(";".join([h,m.start, m.end, m.strand]),mrnaseq)
+    #    h,s = m.get_sequence(fastadct=fasta_dict, regex=r)
+    #    mrnaseq=fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,start=m.start, end=m.end, strand=m.strand)
+    #    m.attach_fasta(";".join([h,m.start, m.end, m.strand]),mrnaseq)
 
 
         # look at all exons of mrna
         # filter for all exons whose parent tag value starts with mrna ID tag
-        mrnaExons = [e for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "Parent", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in m.attributes if a.tag=="ID"][0])]
+    #    mrnaExons = [e for e in exons if e.attrib_filter_fun(tfun= lambda x,y: x==y, targ = "Parent", vfun = lambda x,y: x.startswith(y), varg=[a.value for a in m.attributes if a.tag=="ID"][0])]
 
 
-        print ("#")
+     #   print ("#")
 
-    for c in cds[0:30]:
-        id = c.seqname
-        r = r"""^{}""".format(id)
-        h,s = c.get_sequence(fastadct=fasta_dict, regex=r)
-        cdsseq=fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,start=c.start, end=c.end, strand=c.strand)
-        c.attach_fasta(";".join([h,c.start, c.end, c.strand]),cdsseq, include_protein=True)
-        print(">{}".format(c.fasta_header))
-        print(fh.SeqTranslator.dna2prot(c.fasta_sequence, frameshift=c.frame))
+    def setupseq(gffobj, fastadct,regex, includeprotein):
+        # this is bs... looks like cds need to be concatenated first
+        #if not gffobj.feature in ["cds","CDS"]: #todo
+        #    print("{} might not be translatable to protein sequence".format(gffobj), file=sys.stderr)
 
+        id = gffobj.seqname
+        r = regex.format(id)
+        h,s = gffobj.get_sequence(fastadct=fastadct, regex=r)
+        seq=fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,
+                                                          start=gffobj.start,
+                                                          end=gffobj.end,
+                                                          strand=gffobj.strand)
+        try:
+            gffobj.attach_fasta(";".join([h,gffobj.start,
+                                      gffobj.end,
+                                      gffobj.strand,
+                                      gffobj.frame]),
+                            seq,
+                            include_protein=True)
+        except fh.SequenceTranslationException as e:
+            print("{}, skipping {}".format(e, gffobj), file=sys.stderr)
+    #for c in cds:
+    #    id = c.seqname
+    #    r = r"""^{}""".format(id)
+    #    h,s = c.get_sequence(fastadct=fasta_dict, regex=r)
+    #    cdsseq=fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,start=c.start, end=c.end, strand=c.strand)
+    #    c.attach_fasta(";".join([h,c.start, c.end, c.strand]),cdsseq, include_protein=True)
+    #    print(">{}".format(c.fasta_header))
+    #    print(fh.SeqTranslator.dna2prot(c.fasta_sequence, frameshift=c.frame))
+
+    #for g in genes:
+    #    setupseq(g, fasta_dict, r"""^{}""", includeprotein=True)
+
+    for c in cds:
+        #todo remove includeprotein
+        setupseq(c, fasta_dict, r"""^{}""", includeprotein=True)
     with open ("cds.json", 'w') as out:
         #for m in exons[0:3]:
         #    out.write(m.to_json())
@@ -122,6 +149,11 @@ def main():
         #    out.write(m.to_json(omit_fasta=False))
         for c in cds:
             out.write(c.to_json(omit_fasta_protein=False))
+
+    #with open ("genes.json",'w') as out:
+    #    for g in genes:
+    #        out.write(g.to_json(omit_fasta_protein=False))
+
 
 
 
