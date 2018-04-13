@@ -1,0 +1,6 @@
+
+gene: spans gene 
+  mRNA: spans gene
+    exon: contains both UTR and CDS
+      CDS: incl start and stop codon
+
