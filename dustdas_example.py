@@ -134,7 +134,10 @@ def main():
                 conc += c.fasta_sequence
         with open("{}_cds_concatenated.fasta".format(identifier), 'w') as outfa:
             outfa.write(">{}\n{}\n".format(identifier + "_cds", conc))
-        with open(">{}_cds_prot_concatenated.fasta".format(identifier), 'w') as outfa:
+        with open("{}_cds_prot_concatenated.fasta".format(identifier), 'w') as outfa:
+            fshift = 0
+            if m.frame != ".":
+                fshift = m.frame
             outfa.write("{}\n{}".format(identifier + "_cds_protein", fh.SeqTranslator.dna2prot(conc, frameshift=0)))
 
 

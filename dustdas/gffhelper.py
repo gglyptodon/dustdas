@@ -71,9 +71,12 @@ class GFFObject(object):
                     if header == self.seqname:
                         return header, seq
         elif fastadct:
+            if regex:
+                p = re.compile(regex)
+                #print("debug", regex)
             for header, seq in fastadct.items():
                 if regex:
-                    p = re.compile(regex)
+
                     m = p.match(header)
                     if m:
                         return header, seq
@@ -133,7 +136,46 @@ class GFFAttribute(object):
         return "<tag:{},value:{}>".format(self.tag, self.value)
 
 
+class GFFFile(object):
+
+    @property
+    def metadata(self):
+        return self._metadata
+
+    @property
+    def path(self):
+        return self._path
+
+    @metadata.setter
+    def metadata(self, str): #append, not overwrite
+        self._metadata.append(str.strip().replace("##",""))
+
+    def __init__(self, path):
+        self._metadata = []
+        self._path = path
+        with open(self._path, 'r') as f:
+            for l in f:
+                if l.strip() == "":
+                    pass
+                elif l.startswith("##"):
+                    self.metadata = l # todo confusing
+                elif l.startswith("#"):
+                    pass
+
+    def get_gff_objects(self):
+        with open(self._path, 'r') as f:
+            for l in f:
+                if l.strip() == "":
+                    pass
+                elif l.startswith("#"):
+                    pass
+                else:
+                    obj = GFFObject(gffline=l)
+                    yield obj
+
+
 def read_gff_file(infile):
+
     with open(infile, 'r') as f:
         for l in f:
             if l.strip() == "":
@@ -149,29 +191,35 @@ def read_gff_file(infile):
 
     From http://www.ensembl.org/info/website/upload/gff.html:
     
-    seqname - name of the chromosome or scaffold; chromosome names can be given with or without the 'chr' prefix. Important note: the seqname must be one used within Ensembl, i.e. a standard chromosome name or an Ensembl identifier such as a scaffold ID, without any additional content such as species or assembly. See the example GFF output below.
+    seqname - name of the chromosome or scaffold; chromosome names can be given with or without the 'chr' prefix. 
+              Important note: the seqname must be one used within Ensembl, 
+              i.e. a standard chromosome name or an Ensembl identifier such as a scaffold ID, 
+              without any additional content such as species or assembly. 
+              See the example GFF output below.
     source - name of the program that generated this feature, or the data source (database or project name)
     feature - feature type name, e.g. Gene, Variation, Similarity
     start - Start position of the feature, with sequence numbering starting at 1.
     end - End position of the feature, with sequence numbering starting at 1.
     score - A floating point value.
     strand - defined as + (forward) or - (reverse).
-    frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon, '1' that the second base is the first base of a codon, and so on..
-    attribute - A semicolon-separated list of tag-value pairs, providing additional information about each feature. 
+    frame - One of '0', '1' or '2'. '0' indicates that the first base of the feature is the first base of a codon,
+            '1' that the second base is the first base of a codon, and so on..
+    attribute - A semicolon-separated list of tag-value pairs, 
+                providing additional information about each feature. 
     
-    ID, Name, Alias, Parent, Target, Gap, Derives_from, Note,
-    Dbxref, Ontology_term, Is_circular
-    Parent: groups exons into transcripts, transcripts into genes etc.
-        A feature may have multiple parents.
-    Target: Indicates the target of a nucleotide-to-nucleotide
-        or protein-to-nucleotide alignment.
-        The format of the value is "target_id start end [strand]",
-        where strand is optional and may be "+" or "-".
-    Gap: The alignment of the feature to the target if the two
-        are not collinear (e.g. contain gaps).
-        The alignment format is taken from the CIGAR format described
-        in the Exonerate documentation.
-        (http://cvsweb.sanger.ac.uk/cgi-bin/cvsweb.cgi/exonerate?cvsroot=Ensembl). ("THE GAP ATTRIBUTE")
-    Parent, the Alias, Note, DBxref and Ontology_term attributes can have multiple values.
+        ID, Name, Alias, Parent, Target, Gap, Derives_from, Note,
+        Dbxref, Ontology_term, Is_circular
+        Parent: groups exons into transcripts, transcripts into genes etc.
+            A feature may have multiple parents.
+        Target: Indicates the target of a nucleotide-to-nucleotide
+            or protein-to-nucleotide alignment.
+            The format of the value is "target_id start end [strand]",
+            where strand is optional and may be "+" or "-".
+        Gap: The alignment of the feature to the target if the two
+            are not collinear (e.g. contain gaps).
+            The alignment format is taken from the CIGAR format described
+            in the Exonerate documentation.
+            (http://cvsweb.sanger.ac.uk/cgi-bin/cvsweb.cgi/exonerate?cvsroot=Ensembl). ("THE GAP ATTRIBUTE")
+         Parent, the Alias, Note, DBxref and Ontology_term attributes can have multiple values.
     
-"""
+    """
