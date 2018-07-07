@@ -3,8 +3,10 @@ from dustdas import gffhelper
 import os
 dir = os.path.dirname(__file__)
 
-@pytest.mark.parametrize("gff", [os.path.join(dir,'test.gff3')])
-@pytest.mark.parametrize("expected", [['gff-version 3.2.1', 'sequence-region ctg123 1 1497228']])
+@pytest.mark.parametrize("gff, expected", [(os.path.join(dir,'test.gff3'),['gff-version 3.2.1', 'sequence-region ctg123 1 1497228']),
+                                           (os.path.join(dir,'test2.gff3'),['gff-version 3.2.1', 'sequence-region ctg1234 1 1497228'])
+                                           ]                       # (os.path.join(dir,'test2.gff3'),['gff-version 3.2.1', 'sequence-region ctg1234 1 1497228'])
+                         )
 def test_metadata(gff, expected):
     g = gffhelper.GFFFile(gff)
     assert g.path == gff
