@@ -38,7 +38,7 @@ class GFFObject(object):
         self.strand = d["strand"]
         self.phase = d["phase"]
         self.attribute = d["attribute"]
-        self.attributes = [GFFAttribute(x.strip()) for x in d["attribute"].split(";")]
+        self.attributes = [GFFAttribute(x.strip()) for x in  d["attribute"].split(";")]
         self.fasta_header = None
         self.fasta_sequence = None
     def parse_score(self, d):
@@ -132,9 +132,9 @@ class GFFAttribute(object):
         p = re.compile(r"""(.*)=(.*)""")
         m = p.match(attribute_str)
         if m:
-            r = [{"tag": m.groups()[0], "value": m.groups()[1]}]
+           # r = [{"tag": m.groups()[0], "value": m.groups()[1]}]
             self.tag = m.groups()[0]
-            self.value = m.groups()[1]
+            self.value = [x for x in m.groups()[1].split(",")]
         else:
             self.tag = "wat"
             self.value = "wat"
