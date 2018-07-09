@@ -21,7 +21,7 @@ class GFFObject(object):
                    "end": gffcols[4],
                    "score": gffcols[5],
                    "strand": gffcols[6],
-                   "frame": gffcols[7],
+                   "phase": gffcols[7],
                    "attribute": gffcols[8],
                    }
 
@@ -34,14 +34,21 @@ class GFFObject(object):
         self.type = d["type"]
         self.start = d["start"]
         self.end = d["end"]
-        self.score = d["score"]
+        self.score = self.parse_score(d) #d["score"]
         self.strand = d["strand"]
-        self.frame = d["frame"]
+        self.phase = d["phase"]
         self.attribute = d["attribute"]
         self.attributes = [GFFAttribute(x.strip()) for x in d["attribute"].split(";")]
         self.fasta_header = None
         self.fasta_sequence = None
-
+    def parse_score(self, d):
+        try:
+            return float(d["score"])
+        except ValueError:
+            if d["score"] == ".":
+                return "."
+            else:
+                raise ValueError
     def to_json(self, omit_fasta=False):
         if omit_fasta:
             res = dict()
@@ -113,7 +120,7 @@ class GFFObject(object):
             print("needs tag or value to filter. returns list of matches", file=sys.stderr)
 
     def __repr__(self):
-        return "{},{},{},{},{},{},{},{},{}".format(self.seqid, self.source, self.type, self.start, self.end, self.score, self.strand, self.frame, self.attributes)
+        return "{},{},{},{},{},{},{},{},{}".format(self.seqid, self.source, self.type, self.start, self.end, self.score, self.strand, self.phase, self.attributes)
 
     def attach_fasta(self, header, seq):
         self.fasta_header = header

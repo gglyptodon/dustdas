@@ -33,33 +33,53 @@ def test_source(gff, expected):
         assert o.source == expected
 
 
-@pytest.mark.parametrize("gff,index, expected", [
+@pytest.mark.parametrize("gff, index, expected", [
     (os.path.join(dir,'test.gff3'),0,'gene'),
     (os.path.join(dir,'test.gff3'),1, 'TF_binding_site'),
     (os.path.join(dir,'test.gff3'),2, 'mRNA'),
-    (os.path.join(dir,'test.gff3'),3, 'mRNA'),
-    (os.path.join(dir,'test.gff3'),21, 'CDS'),
+    (os.path.join(dir,'test.gff3'),4, 'mRNA'),
+    (os.path.join(dir,'test.gff3'),22, 'CDS'),
     (os.path.join(dir,'test3.gff3'),0, 'mRNA'),
-    (os.path.join(dir,'test3.gff3'),1, 'exon'),
-
+    (os.path.join(dir,'test3.gff3'),1, 'exon')
     ])
 def test_type(gff, index, expected):
     g = gffhelper.GFFFile(gff)
     objs = list(g.get_gff_objects())
     assert objs[index].type == expected
 
+@pytest.mark.parametrize("gff, index, expected_start, expected_end", [
+    (os.path.join(dir,'test.gff3'),0, 1000, 9000),
+    (os.path.join(dir,'test.gff3'),1, 1000, 1012),
+    (os.path.join(dir,'test.gff3'),2, 1050, 9000),
+    (os.path.join(dir,'test.gff3'),4, 1300, 9000),
+    (os.path.join(dir,'test.gff3'),22, 7000, 7600),
+    (os.path.join(dir,'test3.gff3'),0, 1300, 9000),
+    (os.path.join(dir,'test3.gff3'),1, 1300, 1500)
+    ])
+def test_start_end(gff, index, expected_start, expected_end):
+    g = gffhelper.GFFFile(gff)
+    objs = list(g.get_gff_objects())
+    assert int(objs[index].start) == expected_start
+    assert int(objs[index].end) == expected_end
 
 
-def test_start():
-    pass
-
-
-def test_end():
-    pass
-
-
-def test_score():
-    pass
+@pytest.mark.parametrize("gff, index, expected_score, expected_strand, expected_phase", [
+    (os.path.join(dir,'test.gff3'),0, ".","+", "."),
+    (os.path.join(dir,'test.gff3'),1, ".","+", "."),
+    (os.path.join(dir,'test.gff3'),2, ".","+", "."),
+    (os.path.join(dir,'test.gff3'),4, ".","+", "."),
+    (os.path.join(dir,'test.gff3'),20, ".","+", "0"),
+    (os.path.join(dir,'test.gff3'),22, ".","+", "1"),
+    (os.path.join(dir,'test3.gff3'),1, 1e-2,"+", "."),
+    (os.path.join(dir,'test3.gff3'),2, 0.9, "+", "."),
+    (os.path.join(dir,'test3.gff3'),3, 0.000001, "+", ".")
+    ])
+def test_score(gff, index, expected_score, expected_strand, expected_phase):
+    g = gffhelper.GFFFile(gff)
+    objs = list(g.get_gff_objects())
+    assert objs[index].score == expected_score
+    assert objs[index].strand == expected_strand
+    assert objs[index].phase == expected_phase
 
 
 def test_strand():
