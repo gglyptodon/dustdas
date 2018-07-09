@@ -14,7 +14,7 @@ class GFFObject(object):
         else:
             gffcols = [g.strip() for g in gffline.split("\t")]
 
-            res = {"seqname": gffcols[0],
+            res = {"seqid": gffcols[0],
                    "source": gffcols[1],
                    "feature": gffcols[2],
                    "start": gffcols[3],
@@ -29,7 +29,7 @@ class GFFObject(object):
 
     def __init__(self, gffline):
         d = GFFObject.parse_gffline(gffline)
-        self.seqname = d["seqname"]
+        self.seqid = d["seqid"]
         self.source = d["source"]
         self.feature = d["feature"]
         self.start = d["start"]
@@ -68,7 +68,7 @@ class GFFObject(object):
                     if m:
                         return header, seq
                 else:
-                    if header == self.seqname:
+                    if header == self.seqid:
                         return header, seq
         elif fastadct:
             if regex:
@@ -113,7 +113,7 @@ class GFFObject(object):
             print("needs tag or value to filter. returns list of matches", file=sys.stderr)
 
     def __repr__(self):
-        return "{},{},{},{},{},{},{},{},{}".format(self.seqname, self.source, self.feature, self.start, self.end, self.score, self.strand, self.frame, self.attributes)
+        return "{},{},{},{},{},{},{},{},{}".format(self.seqid, self.source, self.feature, self.start, self.end, self.score, self.strand, self.frame, self.attributes)
 
     def attach_fasta(self, header, seq):
         self.fasta_header = header
@@ -170,7 +170,7 @@ class GFFFile(object):
                 elif l.startswith("#"):
                     pass
                 else:
-                    obj = GFFObject(gffline=l)
+                    obj = GFFObject(gffline=l.strip())
                     yield obj
 
 
@@ -223,3 +223,13 @@ def read_gff_file(infile):
          Parent, the Alias, Note, DBxref and Ontology_term attributes can have multiple values.
     
     """
+"""
+http://www.ensembl.org/info/website/upload/gff3.html
+"""
+"""
+    https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md:
+    seqid, source, type, start, end, score, phase, attributes: 
+        ID, Name, Alias, Parent, Target, Gap, Derives_from, Note, Dbxref, Ontology_term, Is_circular
+        (All attributes that begin with an uppercase letter are reserved for later use. 
+        Attributes that begin with a lowercase letter can be used freely by applications.) 
+"""
