@@ -24,18 +24,30 @@ def test_seqid(gff, expected):
         assert o.seqid == expected
 
 @pytest.mark.parametrize("gff, expected", [
-    (os.path.join(dir,'test.gff3'),'ctg123'),
-    (os.path.join(dir,'test2.gff3'),'ctg1234')
+    (os.path.join(dir,'test.gff3'),'.'),
+    (os.path.join(dir,'test2.gff3'),'.')
     ])
 def test_source(gff, expected):
     g = gffhelper.GFFFile(gff)
     for o in g.get_gff_objects():
-        assert o.seqid == expected
+        assert o.source == expected
 
 
+@pytest.mark.parametrize("gff,index, expected", [
+    (os.path.join(dir,'test.gff3'),0,'gene'),
+    (os.path.join(dir,'test.gff3'),1, 'TF_binding_site'),
+    (os.path.join(dir,'test.gff3'),2, 'mRNA'),
+    (os.path.join(dir,'test.gff3'),3, 'mRNA'),
+    (os.path.join(dir,'test.gff3'),21, 'CDS'),
+    (os.path.join(dir,'test3.gff3'),0, 'mRNA'),
+    (os.path.join(dir,'test3.gff3'),1, 'exon'),
 
-def test_type():
-    pass
+    ])
+def test_type(gff, index, expected):
+    g = gffhelper.GFFFile(gff)
+    objs = list(g.get_gff_objects())
+    assert objs[index].type == expected
+
 
 
 def test_start():

@@ -16,7 +16,7 @@ class GFFObject(object):
 
             res = {"seqid": gffcols[0],
                    "source": gffcols[1],
-                   "feature": gffcols[2],
+                   "type": gffcols[2],
                    "start": gffcols[3],
                    "end": gffcols[4],
                    "score": gffcols[5],
@@ -31,7 +31,7 @@ class GFFObject(object):
         d = GFFObject.parse_gffline(gffline)
         self.seqid = d["seqid"]
         self.source = d["source"]
-        self.feature = d["feature"]
+        self.type = d["type"]
         self.start = d["start"]
         self.end = d["end"]
         self.score = d["score"]
@@ -113,7 +113,7 @@ class GFFObject(object):
             print("needs tag or value to filter. returns list of matches", file=sys.stderr)
 
     def __repr__(self):
-        return "{},{},{},{},{},{},{},{},{}".format(self.seqid, self.source, self.feature, self.start, self.end, self.score, self.strand, self.frame, self.attributes)
+        return "{},{},{},{},{},{},{},{},{}".format(self.seqid, self.source, self.type, self.start, self.end, self.score, self.strand, self.frame, self.attributes)
 
     def attach_fasta(self, header, seq):
         self.fasta_header = header
