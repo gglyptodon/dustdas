@@ -126,6 +126,79 @@ class GFFObject(object):
         self.fasta_header = header
         self.fasta_sequence = seq
 
+    # short cut
+    def get_Parent(self):
+        """return one or multiple Parents"""
+        res = [x.value for x in self.attrib_filter(tag="Parent")]
+        return res
+
+    def get_Alias(self):
+        """return one or multiple Alias'"""
+        res = [x.value for x in self.attrib_filter(tag="Alias")]
+        return res
+
+
+    def get_Note(self):
+        """return one or multiple Notes"""
+        res = [x.value for x in self.attrib_filter(tag="Note")]
+        return res
+
+
+    def get_Dbxref(self):
+        """return one or multiple Dbxrefs"""
+        res = [x.value for x in self.attrib_filter(tag="Dbxref")]
+        return res
+
+
+    def get_Ontology_term(self):
+        """return one or multiple Ontology_terms"""
+        res = [x.value for x in self.attrib_filter(tag="Ontology_term")]
+        return res
+
+    def get_ID(self):
+        """return ID"""
+        res = [x.value for x in self.attrib_filter(tag="ID")]
+        return res
+
+    def get_Name(self):
+        """return Name"""
+        res = [x.value for x in self.attrib_filter(tag="Name")]
+        return res
+
+    def get_Target(self):
+        """return Target""" #TODO
+        """Indicates the target of a nucleotide-to-nucleotide or protein-to-nucleotide alignment. 
+        The format of the value is "target_id start end [strand]", 
+        where strand is optional and may be "+" or "-". 
+        If the target_id contains spaces, they must be escaped as hex escape %20."""
+        res = [x.value for x in self.attrib_filter(tag="Target")]
+        return res
+
+
+    def get_Gap(self): #TODO
+        """The alignment of the feature to the target if the two are not collinear
+        (e.g. contain gaps). The alignment format is taken
+        from the CIGAR format described in the Exonerate documentation.
+        See "THE GAP ATTRIBUTE" for a description of this format."""
+        """return Gap"""
+        res = [x.value for x in self.attrib_filter(tag="Gap")]
+        return res
+
+
+    def get_Derives_from(self): #TODO
+        """Used to disambiguate the relationship between one feature and another
+         when the relationship is a temporal one rather than a purely structural "part of" one.
+        This is needed for polycistronic genes."""
+        """return one or multiple Parents"""
+        res = [x.value for x in self.attrib_filter(tag="Derives_from")]
+        return res
+
+
+    def get_Is_circular(self):
+        """return Is_circular"""
+        res = [x.value for x in self.attrib_filter(tag="Is_circular")]
+        return res
+
 
 class GFFAttribute(object):
     def __init__(self, attribute_str):
