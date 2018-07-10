@@ -94,9 +94,6 @@ def test_attributes(gff, index, expected_attributes ):
     for e in expected_attributes:
         vals = [a.value for a in objs[index].attributes if a.tag == e["tag"]]
         assert vals == [list(e["value"].split(","))] # todo maybe get rid of [[]]
-        #objs[index].attrib_filter_fun(tfun=lambda x, y: x == y, targ=, vfun=lambda x, y: x.startswith(y),
-        #                           varg=[a.value for a in g.attributes if a.tag == "Name"][0])])
-    #assert objs[index].attributes == expected_attributes
 
 
 # attributes
