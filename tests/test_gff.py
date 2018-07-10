@@ -93,30 +93,50 @@ def test_attributes(gff, index, expected_attributes ):
     objs = list(g.get_gff_objects())
     for e in expected_attributes:
         vals = [a.value for a in objs[index].attributes if a.tag == e["tag"]]
-        assert vals == [list(e["value"].split(","))] # todo maybe get rid of [[]]
+        assert vals == [list(e["value"].split(","))]
 
 
 # attributes
 # parent, alias, note, dbxref, ontology_term attributes can have multiple values separated by comma
-def test_attrib_id():
-    pass
+@pytest.mark.parametrize("gff, index, expected_id, expected_alias, expected_note", [
+   # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
+    (os.path.join(dir,'test.gff3'),1, [["tfbs00001"]], None, None),
+    (os.path.join(dir,'test3.gff3'),3, [["exon00003"]],[["Blah"]],[["ABC","DEF"]]),
+])
+def test_attrib_id_alias_note_(gff, index, expected_id, expected_alias, expected_note):
+    g = gffhelper.GFFFile(gff)
+    o= list(g.get_gff_objects())[index]
+    i = o.get_ID()
+    a = o.get_Alias()
+    print(a)
+    n = o.get_Note()
+    assert i == expected_id
+    try:
+        assert a == expected_alias
+    except AssertionError:
+        try:
+            assert  a == []
+        except AssertionError:
+            raise AssertionError
+    try:
+        assert n == expected_note
+    except AssertionError:
+        try:
+            assert n == []
+        except AssertionError:
+            raise AssertionError
 
-
-def test_attrib_name():
-    pass
-
-
-def test_attrib_alias():
-    pass
-def test_attrib_alias_multi():
-    pass
-
-def test_attrib_parent():
-    pass
-
-
-def test_attrib_parent_multi():
-    pass
+@pytest.mark.parametrize("gff, index, expected_Parent", [
+   # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
+    (os.path.join(dir,'test.gff3'),1, [["gene00001"]]),
+    (os.path.join(dir,'test.gff3'),6, [["mRNA00001", "mRNA00002"]]),
+    (os.path.join(dir,'test.gff3'),9, [["mRNA00001", "mRNA00002","mRNA00003"]])
+])
+def test_attrib_parent(gff, index, expected_Parent):
+    g = gffhelper.GFFFile(gff)
+    objs = list(g.get_gff_objects())
+    p = objs[index].get_Parent()
+    assert p == expected_Parent
 
 
 def test_attrib_target():
