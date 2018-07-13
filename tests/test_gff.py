@@ -100,8 +100,8 @@ def test_attributes(gff, index, expected_attributes ):
 # parent, alias, note, dbxref, ontology_term attributes can have multiple values separated by comma
 @pytest.mark.parametrize("gff, index, expected_id, expected_alias, expected_note", [
    # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
-    (os.path.join(dir,'test.gff3'),1, [["tfbs00001"]], None, None),
-    (os.path.join(dir,'test3.gff3'),3, [["exon00003"]],[["Blah"]],[["ABC","DEF"]]),
+    (os.path.join(dir,'test.gff3'),1, ["tfbs00001"], None, None),
+    (os.path.join(dir,'test3.gff3'),3, ["exon00003"],["Blah"],["ABC","DEF"]),
 ])
 def test_attrib_id_alias_note_(gff, index, expected_id, expected_alias, expected_note):
     g = gffhelper.GFFFile(gff)
@@ -128,9 +128,9 @@ def test_attrib_id_alias_note_(gff, index, expected_id, expected_alias, expected
 
 @pytest.mark.parametrize("gff, index, expected_Parent", [
    # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
-    (os.path.join(dir,'test.gff3'),1, [["gene00001"]]),
-    (os.path.join(dir,'test.gff3'),6, [["mRNA00001", "mRNA00002"]]),
-    (os.path.join(dir,'test.gff3'),9, [["mRNA00001", "mRNA00002","mRNA00003"]])
+    (os.path.join(dir,'test.gff3'),1, ["gene00001"]),
+    (os.path.join(dir,'test.gff3'),6, ["mRNA00001", "mRNA00002"]),
+    (os.path.join(dir,'test.gff3'),9, ["mRNA00001", "mRNA00002","mRNA00003"])
 ])
 def test_attrib_parent(gff, index, expected_Parent):
     g = gffhelper.GFFFile(gff)
@@ -139,36 +139,31 @@ def test_attrib_parent(gff, index, expected_Parent):
     assert p == expected_Parent
 
 
-def test_attrib_target():
-    pass
+#def test_attrib_target():
+#    #TODO The format of the value is "target_id start end [strand]", where strand is optional and may be "+" or "-".
+#    pass
 
 
-def test_attrib_gap():
-    pass
+#def test_attrib_gap():
+# TODO ??http://cvsweb.sanger.ac.uk/cgi-bin/cvsweb.cgi/exonerate?cvsroot=Ensembl is down and reference go in cirles -- hooray
+#    pass
 
 
-def test_attrib_derives_from():
-    pass
+#def test_attrib_derives_from():
+# TODO ??
+#    pass
 
-
-def test_attrib_note():
-    pass
-
-def test_attrib_note_multi():
-    pass
-
-
-def test_attrib_ontology_term():
-    pass
-
-def test_attrib_ontology_term_multi():
-    pass
-
-def test_attrib_dbxref():
-    pass
-
-
-def test_attrib_dbxref_multi():
+@pytest.mark.parametrize("gff, index, expected_Ontology_term, expected_Dbxref", [
+   # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
+    (os.path.join(dir,'test3.gff3'),6, ["GO:0046703"], ["EMBL:AA816246","NCBI_gi:10727410"]),
+])
+def test_attrib_ontology_term(gff, index, expected_Ontology_term, expected_Dbxref):
+    g = gffhelper.GFFFile(gff)
+    o = list(g.get_gff_objects())[index]
+    d = [x.strip('"') for x in o.get_Dbxref()]
+    ot = [x.strip('"') for x in o.get_Ontology_term()]
+    assert d == expected_Dbxref
+    assert ot == expected_Ontology_term
     pass
 
 
