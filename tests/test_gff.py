@@ -100,8 +100,8 @@ def test_attributes(gff, index, expected_attributes ):
 # parent, alias, note, dbxref, ontology_term attributes can have multiple values separated by comma
 @pytest.mark.parametrize("gff, index, expected_id, expected_alias, expected_note", [
    # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
-    (os.path.join(dir,'test.gff3'),1, ["tfbs00001"], None, None),
-    (os.path.join(dir,'test3.gff3'),3, ["exon00003"],["Blah"],["ABC","DEF"]),
+    (os.path.join(dir,'test.gff3'),1, "tfbs00001", None, None),
+    (os.path.join(dir,'test3.gff3'),3, "exon00003",["Blah"],["ABC","DEF"]),
 ])
 def test_attrib_id_alias_note_(gff, index, expected_id, expected_alias, expected_note):
     g = gffhelper.GFFFile(gff)
@@ -178,18 +178,60 @@ def test_attrib_is_circular(gff, index, expected_Is_circular):
 
 @pytest.mark.parametrize("gff, expected", [
     (os.path.join(dir,'test_avail.gff3'),{'exon': 5, 'mRNA': 2, 'region': 1, 'translated_nucleotide_match': 2}),
+    (os.path.join(dir,'test.gff3'),{'exon': 5, 'CDS': 13, 'gene': 1, 'mRNA': 3, 'TF_binding_site': 1}),
 ])
 def test_available_types(gff, expected):
     g = gffhelper.GFFFile(gff)
-    o = g.get_available_types()
-    print(o)
-    assert  o == expected
+    t = g.get_available_types()
+    print(t)
+    assert  t == expected
 
-
-def test_mrna_cds():
+@pytest.mark.parametrize("gff, expected", [
+    (os.path.join(dir,'test.gff3'),{'gene00001': ['mRNA00001','mRNA00002','mRNA00003'],
+                                    'mRNA00001': [
+                                        ['exon00002', 'exon00003', 'exon00004', 'exon00005'],
+                                        ['cds00001', 'cds00001', 'cds00001', 'cds00001']
+                                    ],
+                                    'mRNA00002': [
+                                        ['exon00002', 'exon00004', 'exon00005'],
+                                        ['cds00002', 'cds00002', 'cds00002']
+                                    ],
+                                    'mRNA00003':[
+                                        ['exon00001', 'exon00003', 'exon00004', 'exon00005'],
+                                        ['cds00003', 'cds00003', 'cds00003', 'cds00004', 'cds00004', 'cds00004']
+                                    ]
+                                    }),
+])
+def test_mrna_cds(gff, expected):
     """find all cds that belong to mrna"""
+    genes = []
+    mrnas = []
+    cds = []
+    exons = []
+    res = {}
+    gf = gffhelper.GFFFile(gff)
+    for o in  gf.get_gff_objects():
+        if o.type == "gene":
+            genes.append(o)
+        if o.type == "mRNA":
+            mrnas.append(o)
+        if o.type == "CDS":
+            cds.append(o)
+        if o.type == "exon":
+            exons.append(o)
 
-    pass
+    for g in genes:
+        #print("gene:", g)
+        mg = [m.get_ID() for m in mrnas if g.get_ID() in m.get_Parent()]
+        res[g.get_ID()] = mg
+        for m in mg:
+            emg = [e.get_ID() for e in exons if m in e.get_Parent()]
+            res[m] = [emg]
+            cmg = [c.get_ID() for c in cds if m in c.get_Parent()]
+            #print(m,"\n", emg,"\n", cmg, "\n\n")
+            res[m].append(cmg)
+    print(res)
+    assert res == expected
 
 
 def test_proteinconversion():
