@@ -163,7 +163,7 @@ class GFFObject(object):
 
     def get_ID(self):
         """return ID"""
-        return self._get_attrib("ID")
+        return self._get_attrib("ID")[0] #ID should only be there once
 
     def get_Name(self):
         """return Name"""
@@ -238,6 +238,14 @@ class GFFFile(object):
                     self.metadata = l # todo confusing
                 elif l.startswith("#"):
                     pass
+    def get_available_types(self):
+        avail = {}
+        for o in self.get_gff_objects():
+            if o.type in avail:
+                avail[o.type] += 1
+            else:
+                avail[o.type] = 1
+        return avail
 
     def get_gff_objects(self):
         with open(self._path, 'r') as f:

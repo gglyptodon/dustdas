@@ -166,25 +166,31 @@ def test_attrib_ontology_term(gff, index, expected_Ontology_term, expected_Dbxre
     assert ot == expected_Ontology_term
     pass
 
+@pytest.mark.parametrize("gff, index, expected_Is_circular", [
+    (os.path.join(dir,'test3.gff3'),9, ["true"]),
+])
+def test_attrib_is_circular(gff, index, expected_Is_circular):
+    g = gffhelper.GFFFile(gff)
+    o = list(g.get_gff_objects())[index]
+    c = o.get_Is_circular()
+    assert c == expected_Is_circular
 
-def test_attrib_is_circular():
-    pass
 
-
-
+@pytest.mark.parametrize("gff, expected", [
+    (os.path.join(dir,'test_avail.gff3'),{'exon': 5, 'mRNA': 2, 'region': 1, 'translated_nucleotide_match': 2}),
+])
+def test_available_types(gff, expected):
+    g = gffhelper.GFFFile(gff)
+    o = g.get_available_types()
+    print(o)
+    assert  o == expected
 
 
 def test_mrna_cds():
     """find all cds that belong to mrna"""
+
     pass
 
-def test_features_phytozome():
-    """ find all features in gff file (as provided by phytozome)"""
-    pass
-
-def test_features_ensembl():
-    """ find all features in gff file (as provided by ensembl)"""
-    pass
 
 def test_proteinconversion():
     """"""
