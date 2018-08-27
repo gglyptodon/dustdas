@@ -1,6 +1,9 @@
 import pytest
 from dustdas import gffhelper
 import os
+import sys
+import dustdas.fastahelper as fh
+
 dir = os.path.dirname(__file__)
 
 
@@ -99,7 +102,6 @@ def test_attributes(gff, index, expected_attributes ):
 # attributes
 # parent, alias, note, dbxref, ontology_term attributes can have multiple values separated by comma
 @pytest.mark.parametrize("gff, index, expected_id, expected_alias, expected_note", [
-   # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
     (os.path.join(dir,'test.gff3'),1, "tfbs00001", None, None),
     (os.path.join(dir,'test3.gff3'),3, "exon00003",["Blah"],["ABC","DEF"]),
 ])
@@ -127,7 +129,6 @@ def test_attrib_id_alias_note_(gff, index, expected_id, expected_alias, expected
             raise AssertionError
 
 @pytest.mark.parametrize("gff, index, expected_Parent", [
-   # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
     (os.path.join(dir,'test.gff3'),1, ["gene00001"]),
     (os.path.join(dir,'test.gff3'),6, ["mRNA00001", "mRNA00002"]),
     (os.path.join(dir,'test.gff3'),9, ["mRNA00001", "mRNA00002","mRNA00003"])
@@ -154,7 +155,6 @@ def test_attrib_parent(gff, index, expected_Parent):
 #    pass
 
 @pytest.mark.parametrize("gff, index, expected_Ontology_term, expected_Dbxref", [
-   # (os.path.join(dir,'test.gff3'),0, [{"tag":"ID", "value":"gene00001"},{"tag":"Name" , "value":"EDEN"}]),
     (os.path.join(dir,'test3.gff3'),6, ["GO:0046703"], ["EMBL:AA816246","NCBI_gi:10727410"]),
 ])
 def test_attrib_ontology_term(gff, index, expected_Ontology_term, expected_Dbxref):
@@ -221,20 +221,92 @@ def test_mrna_cds(gff, expected):
             exons.append(o)
 
     for g in genes:
-        #print("gene:", g)
         mg = [m.get_ID() for m in mrnas if g.get_ID() in m.get_Parent()]
         res[g.get_ID()] = mg
         for m in mg:
             emg = [e.get_ID() for e in exons if m in e.get_Parent()]
             res[m] = [emg]
             cmg = [c.get_ID() for c in cds if m in c.get_Parent()]
-            #print(m,"\n", emg,"\n", cmg, "\n\n")
             res[m].append(cmg)
     print(res)
     assert res == expected
 
 
-def test_proteinconversion():
-    """"""
-    pass
+"""
+@pytest.mark.parametrize("gff, fasta, id, expected_dna_sequence, expected_pep_sequence", [
+    #(os.path.join(dir,'a.gff3'), os.path.join(dir,'a.cds.fa'),"tmp", "ABC", "DEF"),
+    (os.path.join(dir,"Ath/Athaliana/annotation/Athaliana_167_TAIR10.gene_exons.gff3"),
+     os.path.join(dir,'Ath/Athaliana/annotation/Athaliana_167_TAIR10.cds.fa'),"tmp", "ABC", "DEF"),
+])
+def test_proteinconversion(gff, fasta, id, expected_dna_sequence, expected_pep_sequence):
+    import dustdas.fastahelper as fh
+    gf = gffhelper.GFFFile(gff)
+    objs =  list(gf.get_gff_objects())
+    fasta_dict = fh.FastaParser.read_fasta_whole(fasta)
+    #print("fd",fasta_dict)
+    cds = [o for o in objs if o.type=="CDS"]
+    #print(cds[0])
+    setupseq(cds[0], fasta_dict, r".*{}.*") # startswith
+    print("head",cds[0].fasta_header)
+    print("seq",cds[0].fasta_sequence)
+    print(list(fasta_dict.keys())[0])
+    print("seq2",fasta_dict[cds[0].fasta_header])
+    assert 1==0
+"""
 
+@pytest.mark.parametrize("gff, fasta, id, expected_dna_sequence, expected_pep_sequence", [
+    #(os.path.join(dir,'a.gff3'), os.path.join(dir,'a.cds.fa'),"tmp", "ABC", "DEF"),
+    (os.path.join(dir,"Ath/Athaliana/annotation/Athaliana_167_TAIR10.gene_exons.gff3"),
+     os.path.join(dir,'genomes/Ath.short.fa'),"tmp", "ABC", "DEF"),
+])
+def test_proteinconversion(gff, fasta, id, expected_dna_sequence, expected_pep_sequence):
+    import dustdas.fastahelper as fh
+    gf = gffhelper.GFFFile(gff)
+    objs =  list(gf.get_gff_objects())
+    fasta_dict = fh.FastaParser.read_fasta_whole(fasta)
+    #print("fd",fasta_dict)
+    cds = [o for o in objs if o.type=="CDS"]
+    print(cds[0])
+    setupseq(cds[0], fasta_dict, r".*{}.*") # startswith
+    #print("head",cds[0].fasta_header)
+    #print("seq",cds[0].fasta_sequence)
+    #print(list(fasta_dict.keys())[0])
+    #print("seq2",fasta_dict[cds[0].fasta_header])
+    print("\n\n\n\n")
+    print(cds[0].to_json())
+    print(cds[0].to_json(omit_fasta=True))
+    print(fh.SeqTranslator.dna2prot(cds[0].fasta_sequence, frameshift=cds[0].phase))
+    assert 1==0
+
+
+
+
+def setupseq(gffobj, fastadct, regex):
+    """
+    :param fastadct: dict
+    :param regex: rawstring for regex
+    :type gffobj: GFFObject
+    """
+   # ident = gffobj.get_Parent()[0]
+    ident = gffobj.seqid
+    print("ident",ident)
+    r = regex.format(ident)
+    print(r)
+    h, s = gffobj.get_sequence(fastadct=fastadct, regex=r)
+    seq = fh.FastaParser.get_sequence_by_coordinates(orig_seq=s,
+                                                     start=gffobj.start,
+                                                     end=gffobj.end,
+                                                     strand=gffobj.strand)
+    print("seq",seq)
+    try:
+        gffobj.attach_fasta(";".join([h, gffobj.start,
+                                      gffobj.end,
+                                      gffobj.strand,
+                                      gffobj.phase]),
+                            seq)
+    except fh.SequenceTranslationException as e:
+        print("{}, skipping {}".format(e, gffobj), file=sys.stderr)
+
+
+
+        #todo verbalexpressions
