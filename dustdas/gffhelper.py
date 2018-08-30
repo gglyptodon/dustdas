@@ -1,9 +1,9 @@
 #!/usr/bin/env python
+from __future__ import print_function # python 2
 import re
 import sys
 import json
 import dustdas.fastahelper as fh
-
 
 class GFFObject(object):
     @staticmethod

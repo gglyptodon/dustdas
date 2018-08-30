@@ -1,5 +1,4 @@
-import re
-
+from __future__ import print_function # python 2
 
 class FastaHelper(object):
     @staticmethod
