@@ -253,7 +253,7 @@ def test_proteinconversion(gff, fasta, id, expected_dna_sequence, expected_pep_s
     print("seq2",fasta_dict[cds[0].fasta_header])
     assert 1==0
 """
-
+"""
 @pytest.mark.parametrize("gff, fasta, id, expected_dna_sequence, expected_pep_sequence", [
     #(os.path.join(dir,'a.gff3'), os.path.join(dir,'a.cds.fa'),"tmp", "ABC", "DEF"),
     (os.path.join(dir,"Ath/Athaliana/annotation/Athaliana_167_TAIR10.gene_exons.gff3"),
@@ -280,7 +280,8 @@ def test_proteinconversion(gff, fasta, id, expected_dna_sequence, expected_pep_s
 
 
 
-
+"""
+'''
 def setupseq(gffobj, fastadct, regex):
     """
     :param fastadct: dict
@@ -310,3 +311,4 @@ def setupseq(gffobj, fastadct, regex):
 
 
         #todo verbalexpressions
+    '''
