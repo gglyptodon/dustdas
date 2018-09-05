@@ -108,11 +108,8 @@ def main():
     #example: exons for first mrnas
     for m in mrnas[4:6]:
             with open ("{}_exons.json".format(m.get_ID()),'w') as out:
-                #out.write("[")
                 for e in [x for x in exons if  m.get_ID() in x.get_Parent()]:
                     setupseq(e, fasta_dict, r"^{} .*")
-                    #out.write(e.to_json())
                 out.write(json.dumps([x for x in exons if  m.get_ID() in x.get_Parent()], default=lambda o: o.__dict__, sort_keys=True, indent=4))
-               # out.write("]")
 if __name__ == "__main__":
     main()
