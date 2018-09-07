@@ -105,11 +105,21 @@ def main():
             print("{}, skipping {}".format(e, gffobj), file=sys.stderr)
 
 
-    #example: exons for first mrnas
-    for m in mrnas[4:6]:
-            with open ("{}_exons.json".format(m.get_ID()),'w') as out:
+    #example:
+    for g in genes[0:2]:
+        with open ("{}.json".format(g.get_ID()),'w') as out:
+            for m in [x for x in mrnas if g.get_ID() in x.get_Parent()]:
+                setupseq(m, fasta_dict, r"^{} .*")
                 for e in [x for x in exons if  m.get_ID() in x.get_Parent()]:
                     setupseq(e, fasta_dict, r"^{} .*")
-                out.write(json.dumps([x for x in exons if  m.get_ID() in x.get_Parent()], default=lambda o: o.__dict__, sort_keys=True, indent=4))
+                    e.embed_into(m)
+                for f in [x for x in five_prime_utrs if  m.get_ID() in x.get_Parent()]:
+                    setupseq(f, fasta_dict, r"^{} .*")
+                    f.embed_into(m)
+                for t in [x for x in five_prime_utrs if  m.get_ID() in x.get_Parent()]:
+                    setupseq(t, fasta_dict, r"^{} .*")
+                    t.embed_into(m)
+            out.write(json.dumps([x for x in mrnas if g.get_ID() in x.get_Parent()],default=lambda o: o.__dict__, sort_keys=True, indent=2))
+
 if __name__ == "__main__":
     main()

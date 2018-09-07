@@ -195,6 +195,11 @@ class GFFObject(object):
         """return Is_circular"""
         return self._get_attrib("Is_circular")
 
+    def embed_into(self, other):
+        if not self.type in other.__dict__:
+            other.__dict__[self.type] = [self] #??
+        else:
+            other.__dict__[self.type].append(self)
 
 
 class GFFAttribute(object):
