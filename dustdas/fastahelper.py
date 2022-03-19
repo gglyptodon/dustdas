@@ -1,4 +1,15 @@
 from __future__ import print_function # python 2
+import gzip
+
+
+def text_or_gzip_open(path, mode='r'):
+    if path.endswith('.gz'):
+        mode += 't'  # maintain same functionality as opening text file
+        f = gzip.open(path, mode)
+    else:
+        f = open(path, mode)
+    return f
+
 
 class FastaHelper(object):
     @staticmethod
@@ -30,7 +41,7 @@ class FastaParser(object):
         yield header, sequence
         """
         name = ""
-        fasta = open(fasta, "r")
+        fasta = text_or_gzip_open(fasta, "r")
         while True:
             line = name or fasta.readline()
             if not line:

@@ -5,6 +5,7 @@ import sys
 import json
 import dustdas.fastahelper as fh
 
+
 class GFFObject(object):
     @staticmethod
     def parse_gffline(gffline):
@@ -235,7 +236,7 @@ class GFFFile(object):
     def __init__(self, path):
         self._metadata = []
         self._path = path
-        with open(self._path, 'r') as f:
+        with fh.text_or_gzip_open(self._path, 'r') as f:
             for l in f:
                 if l.strip() == "":
                     pass
@@ -243,6 +244,7 @@ class GFFFile(object):
                     self.metadata = l # todo confusing
                 elif l.startswith("#"):
                     pass
+
     def get_available_types(self):
         avail = {}
         for o in self.get_gff_objects():
@@ -253,7 +255,7 @@ class GFFFile(object):
         return avail
 
     def get_gff_objects(self):
-        with open(self._path, 'r') as f:
+        with fh.text_or_gzip_open(self._path, 'r') as f:
             for l in f:
                 if l.strip() == "":
                     pass
@@ -266,7 +268,7 @@ class GFFFile(object):
 
 def read_gff_file(infile):
 
-    with open(infile, 'r') as f:
+    with fh.text_or_gzip_open(infile, 'r') as f:
         for l in f:
             if l.strip() == "":
                 pass
