@@ -1,13 +1,33 @@
 from __future__ import print_function # python 2
 import gzip
+import zipfile
+import io
 
 
 def text_or_gzip_open(path, mode='r'):
-    if path.endswith('.gz'):
-        mode += 't'  # maintain same functionality as opening text file
+    """tries to open file as gzip, zip, then text"""
+    try:
+        # check if we can open and read the file as a gzip file
+        with gzip.open(path, 'r') as tmp:
+            tmp.read(1)  # because gzip won't throw an error until read
+
+        # if so, open it again, this time to return
+        mode += "t"  # maintains same functionality as opening text file
         f = gzip.open(path, mode)
-    else:
-        f = open(path, mode)
+
+    except gzip.BadGzipFile:
+        # next try zip
+        try:
+            with zipfile.ZipFile(path) as f_archive:
+                file_names = f_archive.namelist()
+                assert len(file_names) == 1, "only zip files with single component are supported"
+                f = io.TextIOWrapper(f_archive.open(file_names[0], mode))
+
+        except zipfile.BadZipFile:
+            # finally assume text
+            # last because the unicode error is most cryptic
+            f = open(path, mode)
+
     return f
 
 
